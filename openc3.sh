@@ -135,7 +135,7 @@ case $1 in
     set +a
     ;;
   run )
-    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d openc3-minio  openc3-redis openc3-redis-ephemeral openc3-cosmos-cmd-tlm-api  openc3-cosmos-script-runner-api  openc3-cosmos-script-runner-api  openc3-traefik openc3-cosmos-init
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d openc3-minio  openc3-redis openc3-redis-ephemeral openc3-cosmos-cmd-tlm-api  openc3-cosmos-script-runner-api  openc3-cosmos-script-runner-api  openc3-traefik openc3-cosmos-init openc3-operator
     ;;
   run-all )
     ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d
