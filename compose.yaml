@@ -258,7 +258,7 @@ services:
       - ".env"
 
   encrypt1:
-      image: hackethos/encrypt1
+      image: hackethos/encrypt1_arm64
       container_name: encrypt1
       networks:
         default:
@@ -268,7 +268,7 @@ services:
         - "1237:1237"
 
   encrypt2:
-    image: hackethos/encrypt2
+    image: hackethos/encrypt2_arm64
     container_name: encrypt2
     networks:
       default:
@@ -278,7 +278,7 @@ services:
       - "1236:1236"
 
   cfs:
-    image: hackethos/icss_cfs
+    image: hackethos/icss_cfs_arm64
     container_name: cfs
     networks:
       default:
