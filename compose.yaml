@@ -284,6 +284,44 @@ services:
     networks:
       default:
         ipv4_address: 172.16.200.8
+ 
+  encrypt1:
+      image: hackethos/encrypt1
+      container_name: encrypt1
+      networks:
+        default:
+          ipv4_address: 172.16.200.12
+      ports:
+        - "1236:1236/udp"
+        - "1237:1237"
+
+  encrypt2:
+    image: hackethos/encrypt2
+    container_name: encrypt2
+    networks:
+      default:
+        ipv4_address: 172.16.200.13
+    ports:
+      - "1235:1235/udp"
+      - "1236:1236"
+
+  cfs:
+    image: hackethos/icss_cfs
+    container_name: cfs
+    networks:
+      default:
+        ipv4_address: 172.16.200.11
+    ports:
+      - "1234:1234/udp"
+      - "1235:1235"
+    cap_add:
+      - CAP_SYS_RESOURCE        
+
+volumes:
+  openc3-redis-v: {}
+  openc3-redis-ephemeral-v: {}
+  openc3-bucket-v: {}
+  openc3-gems-v: {}
 
 volumes:
   openc3-redis-v: {}
