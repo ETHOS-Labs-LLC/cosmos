@@ -35,12 +35,17 @@ fi
 set -e
 
 usage() {
-  echo "Usage: $1 [cli, start, stop, cleanup, run, util]" >&2
+  echo "Usage: $1 [cli, start, stop, cleanup, build, run, test, util]" >&2
   echo "*  cli: run a cli command as the default user ('cli help' for more info)" 1>&2
-  echo "*  start: alias for run" >&2
+  echo "*  start: build and run" >&2
   echo "*  stop: stop the containers (compose stop)" >&2
   echo "*  cleanup [local] [force]: REMOVE volumes / data (compose down -v)" >&2
+  echo "*  build: build the containers (compose build)" >&2
+  echo "*  run: run the Cosmos containers (compose up)" >&2
+  echo "*  run-all: run all the class containers" >&2
+  echo "*  dev: run using compose-dev" >&2
   echo "*  run: run the containers (compose up)" >&2
+  echo "*  test: test openc3" >&2
   echo "*  util: various helper commands" >&2
   exit 1
 }
@@ -61,6 +66,14 @@ case $1 in
     args=`echo $@ | { read _ args; echo $args; }`
     ${DOCKER_COMPOSE_COMMAND} -f "$(dirname -- "$0")/compose.yaml" run -it --rm -v `pwd`:/openc3/local:z -w /openc3/local -e OPENC3_API_PASSWORD=$OPENC3_API_PASSWORD --no-deps openc3-cosmos-cmd-tlm-api ruby /openc3/bin/openc3cli $args
     set +a
+    ;;
+  start )
+    ./openc3.sh build
+    ./openc3.sh run
+    ;;
+  start-ubi )
+    ./openc3.sh build-ubi
+    ./openc3.sh run-ubi
     ;;
   stop )
     ${DOCKER_COMPOSE_COMMAND} stop openc3-operator
@@ -90,11 +103,40 @@ case $1 in
       cd ../..
     fi
     ;;
-  start | run )
+  build )
+    scripts/linux/openc3_setup.sh
+    # Handle restrictive umasks - Built files need to be world readable
+    umask 0022
+    chmod -R +r .
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml -f compose-build.yaml build openc3-ruby
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml -f compose-build.yaml build openc3-base
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml -f compose-build.yaml build openc3-node
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml -f compose-build.yaml build
+    ;;
+  build-ubi )
+    set -a
+    . "$(dirname -- "$0")/.env"
+    if test -f /etc/ssl/certs/ca-bundle.crt
+    then
+      cp /etc/ssl/certs/ca-bundle.crt ./cacert.pem
+    fi
+    scripts/linux/openc3_setup.sh
+    scripts/linux/openc3_build_ubi.sh
+    set +a
+    ;;
+  run )
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d openc3-minio  openc3-redis openc3-redis-ephemeral openc3-cosmos-cmd-tlm-api  openc3-cosmos-script-runner-api  openc3-cosmos-script-runner-api  openc3-traefik openc3-cosmos-init openc3-operator
+    ;;
+  run-all )
     ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d
     ;;
   run-ubi )
     OPENC3_IMAGE_SUFFIX=-ubi OPENC3_REDIS_VOLUME=/home/data ${DOCKER_COMPOSE_COMMAND} -f compose.yaml up -d
+    ;;
+  test )
+    scripts/linux/openc3_setup.sh
+    ${DOCKER_COMPOSE_COMMAND} -f compose.yaml -f compose-build.yaml build
+    scripts/linux/openc3_test.sh "${@:2}"
     ;;
   util )
     set -a
