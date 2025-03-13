@@ -322,9 +322,3 @@ volumes:
   openc3-redis-ephemeral-v: {}
   openc3-bucket-v: {}
   openc3-gems-v: {}
-
-volumes:
-  openc3-redis-v: {}
-  openc3-redis-ephemeral-v: {}
-  openc3-bucket-v: {}
-  openc3-gems-v: {}
